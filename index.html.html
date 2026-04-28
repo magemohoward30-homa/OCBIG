@@ -1,0 +1,610 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body, html { font-family: var(--font-sans); }
+
+#sim-root {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 0;
+  background: transparent;
+}
+
+.phone-frame {
+  width: 340px;
+  min-height: 620px;
+  border: 2px solid var(--color-border-secondary);
+  border-radius: 36px;
+  background: var(--color-background-primary);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px 4px;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+
+.screen {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+}
+.screen.active { display: flex; }
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  gap: 10px;
+}
+.nav-back {
+  font-size: 13px;
+  color: #185FA5;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+}
+.nav-back:hover { background: var(--color-background-secondary); }
+.nav-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+
+.body-scroll { padding: 14px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+
+.header-card {
+  background: #E6F1FB;
+  border-radius: 14px;
+  padding: 14px;
+}
+.header-card .greeting { font-size: 11px; color: #185FA5; margin-bottom: 2px; }
+.header-card .name { font-size: 16px; font-weight: 500; color: #042C53; }
+.header-card .subtitle { font-size: 12px; color: #185FA5; margin-top: 2px; }
+
+.section-label { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+
+.card {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.card:hover { background: var(--color-background-secondary); }
+.card-row { display: flex; align-items: center; gap: 10px; }
+.card-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.card-text .ct { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+.card-text .cs { font-size: 11px; color: var(--color-text-secondary); margin-top: 1px; }
+.card-arrow { margin-left: auto; color: var(--color-text-tertiary); font-size: 14px; }
+
+.progress-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.prog-bar-bg { flex: 1; height: 5px; background: var(--color-background-secondary); border-radius: 3px; }
+.prog-bar-fill { height: 100%; border-radius: 3px; }
+.prog-label { font-size: 10px; color: var(--color-text-secondary); min-width: 28px; text-align: right; }
+
+.badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 500; }
+.badge-green { background: #EAF3DE; color: #3B6D11; }
+.badge-amber { background: #FAEEDA; color: #854F0B; }
+.badge-blue { background: #E6F1FB; color: #185FA5; }
+.badge-purple { background: #EEEDFE; color: #534AB7; }
+
+.ai-bubble {
+  background: #EEEDFE;
+  border-radius: 12px 12px 12px 4px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #26215C;
+  line-height: 1.6;
+}
+.ai-label { font-size: 10px; color: #534AB7; font-weight: 500; margin-bottom: 4px; }
+
+.sim-btn {
+  display: block; width: 100%; padding: 10px;
+  background: #185FA5; color: #E6F1FB;
+  border: none; border-radius: 10px;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  text-align: center; margin-top: auto;
+}
+.sim-btn:hover { background: #0C447C; }
+.sim-btn-outline {
+  display: block; width: 100%; padding: 10px;
+  background: transparent; color: #185FA5;
+  border: 0.5px solid #185FA5; border-radius: 10px;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  text-align: center;
+}
+.sim-btn-outline:hover { background: #E6F1FB; }
+
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat-box { background: var(--color-background-secondary); border-radius: 10px; padding: 10px; }
+.stat-val { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+.stat-lbl { font-size: 10px; color: var(--color-text-secondary); margin-top: 2px; }
+
+.lab-canvas {
+  background: #EAF3DE;
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+}
+.lab-title { font-size: 12px; font-weight: 500; color: #3B6D11; margin-bottom: 8px; }
+
+.plant-wrap { display: flex; justify-content: center; margin: 10px 0; }
+.plant-svg { transition: all 0.5s; }
+
+.slider-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+.slider-row label { font-size: 11px; color: var(--color-text-secondary); width: 80px; }
+.slider-row input { flex: 1; }
+.slider-row .val { font-size: 11px; font-weight: 500; color: var(--color-text-primary); min-width: 30px; text-align: right; }
+
+.quiz-card {
+  background: var(--color-background-secondary);
+  border-radius: 12px; padding: 14px;
+}
+.quiz-q { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 10px; line-height: 1.5; }
+.quiz-opt {
+  display: block; width: 100%; text-align: left;
+  padding: 9px 12px; border-radius: 8px;
+  border: 0.5px solid var(--color-border-secondary);
+  background: var(--color-background-primary);
+  font-size: 12px; color: var(--color-text-primary);
+  cursor: pointer; margin-bottom: 6px;
+  transition: background 0.15s;
+}
+.quiz-opt:hover { background: #E6F1FB; border-color: #85B7EB; }
+.quiz-opt.correct { background: #EAF3DE; border-color: #639922; color: #27500A; }
+.quiz-opt.wrong { background: #FCEBEB; border-color: #F09595; color: #A32D2D; }
+
+.dash-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.dash-row:last-child { border-bottom: none; }
+.dash-name { font-size: 12px; color: var(--color-text-primary); }
+.dash-bar-bg { width: 80px; height: 6px; background: var(--color-background-secondary); border-radius: 3px; }
+.dash-bar-fill { height: 100%; border-radius: 3px; }
+
+.notif-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #E24B4A; display: inline-block; margin-left: 4px;
+}
+
+.tab-bar {
+  display: flex;
+  border-top: 0.5px solid var(--color-border-tertiary);
+  background: var(--color-background-primary);
+}
+.tab-item {
+  flex: 1; text-align: center; padding: 10px 0 8px;
+  font-size: 10px; color: var(--color-text-secondary); cursor: pointer;
+}
+.tab-item.active { color: #185FA5; }
+.tab-icon { font-size: 18px; display: block; margin-bottom: 2px; }
+
+.timeline-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  pointer-events: none; z-index: 10;
+  display: flex; flex-direction: column; align-items: center; padding-bottom: 8px;
+}
+.tl-inner {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: 20px;
+  padding: 8px 16px;
+  display: flex; align-items: center; gap: 10px;
+  pointer-events: all;
+}
+.tl-label { font-size: 11px; color: var(--color-text-secondary); white-space: nowrap; }
+.tl-track { width: 140px; height: 4px; background: var(--color-background-secondary); border-radius: 2px; }
+.tl-fill { height: 100%; border-radius: 2px; background: #185FA5; transition: width 0.4s; }
+.tl-btn {
+  padding: 5px 12px; border-radius: 20px;
+  background: #185FA5; color: #E6F1FB;
+  border: none; font-size: 11px; cursor: pointer; pointer-events: all;
+}
+.tl-btn:hover { background: #0C447C; }
+
+.fade-in { animation: fi 0.35s ease; }
+@keyframes fi { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+<h2 class="sr-only">Interactive simulation of the Smart OCBIG Science Learning Hub mobile application, showing the student journey through personalized learning, virtual labs, and assessment.</h2>
+
+<div id="sim-root">
+  <div class="phone-frame">
+
+    <div class="status-bar">
+      <span>9:41 AM</span>
+      <span style="font-weight:500; color: #185FA5; font-size:12px;">Smart OCBIG Hub</span>
+      <span>▊▊▊</span>
+    </div>
+
+    <!-- SCREEN 0: Login / Splash -->
+    <div class="screen active" id="s0">
+      <div class="body-scroll" style="justify-content: center; align-items: center; min-height: 520px;">
+        <div style="text-align: center; padding: 20px 10px;">
+          <div style="width: 64px; height: 64px; border-radius: 18px; background: #E6F1FB; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 30px;">🔬</div>
+          <div style="font-size: 20px; font-weight: 500; color: var(--color-text-primary);">Smart OCBIG Hub</div>
+          <div style="font-size: 12px; color: var(--color-text-secondary); margin: 4px 0 24px; line-height: 1.5;">Scalable Digital Teaching–Learning<br>Ecosystem · Tanzania</div>
+          <div style="background: var(--color-background-secondary); border-radius: 12px; padding: 14px; margin-bottom: 16px; text-align: left;">
+            <div style="font-size: 11px; color: var(--color-text-secondary); margin-bottom: 6px;">Sign in as</div>
+            <div style="display: flex; gap: 8px;">
+              <button class="sim-btn-outline" style="flex:1; margin-top:0;" onclick="loginAs('student')">Student</button>
+              <button class="sim-btn" style="flex:1; margin-top:0;" onclick="loginAs('teacher')">Teacher</button>
+            </div>
+          </div>
+          <div style="font-size: 10px; color: var(--color-text-tertiary);">MUST · Mbeya University of Science & Technology</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 1: Student Home -->
+    <div class="screen" id="s1">
+      <div class="body-scroll">
+        <div class="header-card">
+          <div class="greeting">Good morning 👋</div>
+          <div class="name">Amina Mwanga</div>
+          <div class="subtitle">Form 4 · Mbeya Secondary School</div>
+          <div class="progress-row" style="margin-top: 10px;">
+            <span style="font-size:10px; color:#185FA5;">Weekly goal</span>
+            <div class="prog-bar-bg" style="flex:1;"><div class="prog-bar-fill" style="width:62%; background:#185FA5;"></div></div>
+            <span class="prog-label" style="color:#185FA5;">62%</span>
+          </div>
+        </div>
+
+        <div class="ai-bubble">
+          <div class="ai-label">🤖 AI Recommendation</div>
+          Your diagnostic shows gaps in <strong>photosynthesis</strong> and <strong>cell division</strong>. I've prepared a personalised pathway — start with the virtual lab today!
+        </div>
+
+        <div class="section-label">My learning path</div>
+
+        <div class="card" onclick="goto('s2')">
+          <div class="card-row">
+            <div class="card-icon" style="background:#EAF3DE;">🌿</div>
+            <div class="card-text">
+              <div class="ct">Virtual Lab — Photosynthesis</div>
+              <div class="cs">Competence 3 · Bloom's: Apply</div>
+            </div>
+            <div class="card-arrow">›</div>
+          </div>
+          <div class="progress-row">
+            <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:40%; background:#639922;"></div></div>
+            <span class="prog-label">40%</span>
+          </div>
+        </div>
+
+        <div class="card" onclick="goto('s4')">
+          <div class="card-row">
+            <div class="card-icon" style="background:#FAEEDA;">📝</div>
+            <div class="card-text">
+              <div class="ct">Competence Assessment</div>
+              <div class="cs">Cell Division · 5 questions</div>
+            </div>
+            <div class="card-arrow">›</div>
+          </div>
+          <div class="progress-row">
+            <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:0%; background:#BA7517;"></div></div>
+            <span class="prog-label">0%</span>
+          </div>
+        </div>
+
+        <div class="section-label">Achievements</div>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          <span class="badge badge-green">🏅 First Lab</span>
+          <span class="badge badge-purple">⭐ 3-day streak</span>
+          <span class="badge badge-amber">🔥 Top scorer</span>
+          <span class="badge" style="background:var(--color-background-secondary); color:var(--color-text-secondary);">🔒 Master badge</span>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item active"><span class="tab-icon">🏠</span>Home</div>
+        <div class="tab-item" onclick="goto('s2')"><span class="tab-icon">🔬</span>Lab</div>
+        <div class="tab-item" onclick="goto('s4')"><span class="tab-icon">📝</span>Quiz</div>
+        <div class="tab-item" onclick="goto('s5')"><span class="tab-icon">📊</span>Progress</div>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: Virtual Lab -->
+    <div class="screen" id="s2">
+      <div class="nav-bar">
+        <button class="nav-back" onclick="goto('s1')">‹ Home</button>
+        <div class="nav-title">Virtual Science Lab</div>
+      </div>
+      <div class="body-scroll">
+        <div class="lab-canvas">
+          <div class="lab-title">🌿 Photosynthesis Experiment</div>
+          <div class="plant-wrap">
+            <svg id="plantSvg" class="plant-svg" width="120" height="140" viewBox="0 0 120 140">
+              <rect x="55" y="80" width="10" height="50" rx="3" fill="#639922"/>
+              <ellipse id="leaf1" cx="60" cy="70" rx="28" ry="18" fill="#639922" opacity="0.9"/>
+              <ellipse id="leaf2" cx="40" cy="85" rx="18" ry="10" fill="#97C459" opacity="0.8" transform="rotate(-30 40 85)"/>
+              <ellipse id="leaf3" cx="80" cy="85" rx="18" ry="10" fill="#97C459" opacity="0.8" transform="rotate(30 80 85)"/>
+              <circle id="sun" cx="100" cy="18" r="14" fill="#EF9F27"/>
+              <g id="co2g" opacity="0.7">
+                <text x="6" y="40" font-size="9" fill="#5F5E5A">CO₂</text>
+                <text x="6" y="60" font-size="9" fill="#5F5E5A">H₂O</text>
+              </g>
+              <g id="o2g" opacity="0">
+                <text x="82" y="55" font-size="9" fill="#3B6D11">O₂</text>
+                <text x="82" y="70" font-size="9" fill="#3B6D11">↑</text>
+              </g>
+            </svg>
+          </div>
+          <div class="slider-row">
+            <label>Light intensity</label>
+            <input type="range" min="0" max="100" value="50" id="lightSlider" oninput="updateLab()" />
+            <span class="val" id="lightVal">50</span>
+          </div>
+          <div class="slider-row">
+            <label>CO₂ level</label>
+            <input type="range" min="0" max="100" value="50" id="co2Slider" oninput="updateLab()" />
+            <span class="val" id="co2Val">50</span>
+          </div>
+          <div style="margin-top: 8px; padding: 8px; background: rgba(255,255,255,0.6); border-radius: 8px;">
+            <div style="font-size: 11px; color: #3B6D11; font-weight: 500;">Oxygen output: <span id="o2Rate">medium</span></div>
+            <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">Glucose production: <span id="glucRate">moderate</span></div>
+          </div>
+        </div>
+
+        <div class="ai-bubble">
+          <div class="ai-label">🤖 Intelligent Tutor</div>
+          <span id="tutorHint">Try increasing light intensity to see how the rate of photosynthesis changes. What happens to O₂ output?</span>
+        </div>
+
+        <div style="font-size: 12px; color: var(--color-text-secondary); line-height: 1.6; background: var(--color-background-secondary); border-radius: 10px; padding: 10px;">
+          <strong style="color: var(--color-text-primary);">Observation log</strong><br>
+          No physical equipment needed. Manipulate variables and observe real-time outcomes — anywhere in Tanzania.
+        </div>
+
+        <button class="sim-btn" onclick="goto('s3')">Complete lab → take assessment ›</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: Lab complete -->
+    <div class="screen" id="s3">
+      <div class="nav-bar">
+        <button class="nav-back" onclick="goto('s2')">‹ Lab</button>
+        <div class="nav-title">Lab Complete</div>
+      </div>
+      <div class="body-scroll" style="align-items:center; text-align:center; justify-content:center;">
+        <div style="font-size: 48px; margin-bottom: 10px;">🎉</div>
+        <div style="font-size: 16px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px;">Lab session complete!</div>
+        <div style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 20px; line-height: 1.6;">You've observed how light intensity and CO₂ affect photosynthesis rate. Competence 3 progress updated.</div>
+
+        <div class="stat-grid" style="width: 100%; margin-bottom: 16px;">
+          <div class="stat-box"><div class="stat-val" style="color:#639922;">+25</div><div class="stat-lbl">Points earned</div></div>
+          <div class="stat-box"><div class="stat-val" style="color:#185FA5;">70%</div><div class="stat-lbl">Lab progress</div></div>
+        </div>
+
+        <div class="ai-bubble" style="text-align:left; width:100%;">
+          <div class="ai-label">🤖 AI pathway update</div>
+          Great work! Based on your lab performance, I recommend completing the competence quiz next. Mastery unlocks Cell Division — your next topic.
+        </div>
+
+        <button class="sim-btn" style="margin-top: 16px;" onclick="goto('s4')">Start competence quiz ›</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 4: Quiz -->
+    <div class="screen" id="s4">
+      <div class="nav-bar">
+        <button class="nav-back" onclick="goto('s1')">‹ Home</button>
+        <div class="nav-title">Competence Assessment</div>
+      </div>
+      <div class="body-scroll">
+        <div class="badge badge-blue" style="align-self: flex-start;">Bloom's level: Understand → Apply</div>
+        <div class="quiz-card">
+          <div class="quiz-q">Which factor most directly limits the rate of photosynthesis when light is abundant but CO₂ is very low?</div>
+          <button class="quiz-opt" onclick="answerQuiz(this, false)">A. Water availability</button>
+          <button class="quiz-opt" onclick="answerQuiz(this, true)">B. Carbon dioxide concentration</button>
+          <button class="quiz-opt" onclick="answerQuiz(this, false)">C. Chlorophyll amount</button>
+          <button class="quiz-opt" onclick="answerQuiz(this, false)">D. Temperature</button>
+        </div>
+        <div id="quizFeedback" style="display:none;" class="ai-bubble">
+          <div class="ai-label">🤖 Instant feedback</div>
+          <span id="feedbackText"></span>
+        </div>
+        <div id="quizNext" style="display:none;">
+          <button class="sim-btn" onclick="goto('s5')">View my progress dashboard ›</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 5: Progress / Dashboard -->
+    <div class="screen" id="s5">
+      <div class="nav-bar">
+        <button class="nav-back" onclick="goto('s1')">‹ Home</button>
+        <div class="nav-title" id="dashTitle">My progress</div>
+      </div>
+      <div class="body-scroll">
+        <div class="stat-grid">
+          <div class="stat-box"><div class="stat-val" style="color:#185FA5;">7</div><div class="stat-lbl">Day streak 🔥</div></div>
+          <div class="stat-box"><div class="stat-val" style="color:#639922;">3/5</div><div class="stat-lbl">Competences mastered</div></div>
+          <div class="stat-box"><div class="stat-val" style="color:#534AB7;">142</div><div class="stat-lbl">Total points</div></div>
+          <div class="stat-box"><div class="stat-val" style="color:#BA7517;">82%</div><div class="stat-lbl">Avg. score</div></div>
+        </div>
+
+        <div class="section-label">Competence tracker</div>
+        <div style="background: var(--color-background-secondary); border-radius: 12px; padding: 12px;">
+          <div class="dash-row">
+            <span class="dash-name">Cell structure</span>
+            <div class="dash-bar-bg"><div class="dash-bar-fill" style="width:90%; background:#639922;"></div></div>
+            <span class="badge badge-green">✓</span>
+          </div>
+          <div class="dash-row">
+            <span class="dash-name">Photosynthesis</span>
+            <div class="dash-bar-bg"><div class="dash-bar-fill" style="width:70%; background:#185FA5;"></div></div>
+            <span class="badge badge-blue">70%</span>
+          </div>
+          <div class="dash-row">
+            <span class="dash-name">Cell division</span>
+            <div class="dash-bar-bg"><div class="dash-bar-fill" style="width:20%; background:#BA7517;"></div></div>
+            <span class="badge badge-amber">20%</span>
+          </div>
+          <div class="dash-row">
+            <span class="dash-name">Genetics basics</span>
+            <div class="dash-bar-bg"><div class="dash-bar-fill" style="width:0%; background:#888780;"></div></div>
+            <span style="font-size:10px; color:var(--color-text-tertiary);">Locked</span>
+          </div>
+        </div>
+
+        <div class="section-label">Teacher dashboard view</div>
+        <div style="background: #E6F1FB; border-radius: 12px; padding: 12px;">
+          <div style="font-size: 11px; color: #185FA5; font-weight: 500; margin-bottom: 8px;">Class overview — Mr. Kibona</div>
+          <div class="dash-row">
+            <span class="dash-name" style="font-size:11px;">Amina M.</span>
+            <div class="dash-bar-bg"><div class="dash-bar-fill" style="width:82%; background:#185FA5;"></div></div>
+            <span style="font-size:10px; color:#185FA5; min-width:28px; text-align:right;">82%</span>
+          </div>
+          <div class="dash-row">
+            <span class="dash-name" style="font-size:11px;">Brian K.</span>
+            <div class="dash-bar-bg"><div class="dash-bar-fill" style="width:55%; background:#BA7517;"></div></div>
+            <span style="font-size:10px; color:#BA7517; min-width:28px; text-align:right;">55%</span>
+          </div>
+          <div class="dash-row">
+            <span class="dash-name" style="font-size:11px;">Fatuma S.</span>
+            <div class="dash-bar-bg"><div class="dash-bar-fill" style="width:91%; background:#639922;"></div></div>
+            <span style="font-size:10px; color:#639922; min-width:28px; text-align:right;">91%</span>
+          </div>
+          <div style="margin-top: 8px; padding: 8px; background: rgba(255,255,255,0.7); border-radius: 8px;">
+            <div style="font-size:10px; color:#0C447C;">⚠️ At-risk flag: Brian K. needs intervention in photosynthesis</div>
+          </div>
+        </div>
+
+        <button class="sim-btn-outline" onclick="goto('s0')">← Back to start</button>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item" onclick="goto('s1')"><span class="tab-icon">🏠</span>Home</div>
+        <div class="tab-item" onclick="goto('s2')"><span class="tab-icon">🔬</span>Lab</div>
+        <div class="tab-item" onclick="goto('s4')"><span class="tab-icon">📝</span>Quiz</div>
+        <div class="tab-item active"><span class="tab-icon">📊</span>Progress</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Timeline controls -->
+  <div style="margin-top: 16px; display: flex; align-items: center; gap: 10px; background: var(--color-background-secondary); border-radius: 20px; padding: 8px 16px;">
+    <span style="font-size: 11px; color: var(--color-text-secondary);" id="tlLabel">Step 1 of 6</span>
+    <div style="width: 140px; height: 4px; background: var(--color-border-tertiary); border-radius: 2px;">
+      <div id="tlFill" style="height:100%; border-radius:2px; background:#185FA5; width:16%; transition: width 0.4s;"></div>
+    </div>
+    <button style="padding: 5px 14px; border-radius: 20px; background: #185FA5; color: #E6F1FB; border: none; font-size: 11px; cursor: pointer;" id="tlBtn" onclick="nextStep()">Next ›</button>
+  </div>
+  <div style="font-size: 11px; color: var(--color-text-tertiary); margin-top: 6px; text-align: center;" id="tlDesc">App launch — choose your role</div>
+</div>
+
+<script>
+const steps = [
+  { screen: 's0', label: 'Step 1 of 6', desc: 'App launch — choose your role', pct: 16 },
+  { screen: 's1', label: 'Step 2 of 6', desc: 'Student home — AI personalised pathway', pct: 33 },
+  { screen: 's2', label: 'Step 3 of 6', desc: 'Virtual science lab — photosynthesis', pct: 50 },
+  { screen: 's3', label: 'Step 4 of 6', desc: 'Lab complete — AI updates learning path', pct: 67 },
+  { screen: 's4', label: 'Step 5 of 6', desc: 'Competence-based quiz with instant feedback', pct: 83 },
+  { screen: 's5', label: 'Step 6 of 6', desc: 'Progress dashboard — student & teacher view', pct: 100 },
+];
+let cur = 0;
+
+function goto(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  el.classList.add('active');
+  el.classList.remove('fade-in');
+  void el.offsetWidth;
+  el.classList.add('fade-in');
+  const idx = steps.findIndex(s => s.screen === id);
+  if (idx >= 0) {
+    cur = idx;
+    updateTimeline();
+  }
+}
+
+function nextStep() {
+  if (cur < steps.length - 1) { cur++; goto(steps[cur].screen); }
+  else { cur = 0; goto(steps[0].screen); }
+}
+
+function updateTimeline() {
+  const s = steps[cur];
+  document.getElementById('tlLabel').textContent = s.label;
+  document.getElementById('tlDesc').textContent = s.desc;
+  document.getElementById('tlFill').style.width = s.pct + '%';
+  document.getElementById('tlBtn').textContent = cur < steps.length - 1 ? 'Next ›' : 'Restart ↺';
+}
+
+function loginAs(role) {
+  if (role === 'student') goto('s1');
+  else { goto('s5'); document.getElementById('dashTitle').textContent = 'Teacher dashboard'; }
+}
+
+function updateLab() {
+  const light = parseInt(document.getElementById('lightSlider').value);
+  const co2 = parseInt(document.getElementById('co2Slider').value);
+  document.getElementById('lightVal').textContent = light;
+  document.getElementById('co2Val').textContent = co2;
+  const rate = Math.round((light * co2) / 100);
+  const o2El = document.getElementById('o2Rate');
+  const glEl = document.getElementById('glucRate');
+  const tutorEl = document.getElementById('tutorHint');
+  const sun = document.getElementById('sun');
+  const o2g = document.getElementById('o2g');
+  const leaf1 = document.getElementById('leaf1');
+  if (rate < 20) {
+    o2El.textContent = 'very low'; glEl.textContent = 'minimal';
+    tutorEl.textContent = 'Both light and CO₂ are needed. Try increasing one of them!';
+    sun.setAttribute('r', '8'); o2g.style.opacity = 0;
+    leaf1.setAttribute('rx', '20'); leaf1.setAttribute('ry', '12');
+  } else if (rate < 50) {
+    o2El.textContent = 'low'; glEl.textContent = 'moderate';
+    tutorEl.textContent = 'Getting better! Increase light or CO₂ to boost the rate further.';
+    sun.setAttribute('r', '11'); o2g.style.opacity = 0.4;
+    leaf1.setAttribute('rx', '24'); leaf1.setAttribute('ry', '15');
+  } else if (rate < 75) {
+    o2El.textContent = 'medium'; glEl.textContent = 'good';
+    tutorEl.textContent = 'Nice! Notice how the plant produces more O₂. Can you push it higher?';
+    sun.setAttribute('r', '13'); o2g.style.opacity = 0.7;
+    leaf1.setAttribute('rx', '28'); leaf1.setAttribute('ry', '18');
+  } else {
+    o2El.textContent = 'high'; glEl.textContent = 'maximum';
+    tutorEl.textContent = 'Excellent! Maximum photosynthesis rate achieved. Both light and CO₂ are optimal.';
+    sun.setAttribute('r', '16'); o2g.style.opacity = 1;
+    leaf1.setAttribute('rx', '32'); leaf1.setAttribute('ry', '20');
+  }
+}
+
+function answerQuiz(btn, correct) {
+  document.querySelectorAll('.quiz-opt').forEach(b => { b.disabled = true; });
+  const fb = document.getElementById('quizFeedback');
+  const ft = document.getElementById('feedbackText');
+  const nxt = document.getElementById('quizNext');
+  if (correct) {
+    btn.classList.add('correct');
+    ft.textContent = 'Correct! CO₂ is the limiting factor here — it is directly used in the Calvin cycle to synthesise glucose. Well done, Amina! Competence level updated.';
+    fb.style.background = '#EAF3DE';
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.quiz-opt')[1].classList.add('correct');
+    ft.textContent = 'Not quite — CO₂ is the limiting factor. It is consumed in the Calvin cycle. Review the lab observation and try the next question!';
+    fb.style.background = '#FCEBEB';
+  }
+  fb.style.display = 'block';
+  nxt.style.display = 'block';
+}
+
+updateTimeline();
+updateLab();
+</script>
