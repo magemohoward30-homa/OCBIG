@@ -1,5 +1,38 @@
 
 <style>
+
+.section-box {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  max-width: 700px;
+  margin: 0 auto;
+}
+.images-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.images-row img {
+  flex: 1;
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+.video-box {
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+
+
+
+
+
+  
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body, html { font-family: var(--font-sans); }
 
@@ -223,6 +256,39 @@ body, html { font-family: var(--font-sans); }
 
 <h2 class="sr-only">Interactive simulation of the Smart OCBIG Science Learning Hub mobile application, showing the student journey through personalized learning, virtual labs, and assessment.</h2>
 <img src="images/Teacher1.jpeg" alt="Teachers training"style="width: 50%; max-width: 300px; height: auto;">
+
+
+
+<div class="section-box">
+  <h2>📸 Teachers Training Gallery</h2>
+
+  <!-- THREE IMAGES IN A ROW -->
+  <div class="images-row">
+    <img src="images/Teacher1.jpeg" alt="Teachers training 1">
+    <img src="images/Teacher2.jpeg" alt="Teachers training 2">
+    <img src="images/Teacher3.jpeg" alt="Teachers training 3">
+  </div>
+
+  <!-- ONE VIDEO -->
+  <div class="video-box">
+    <video controls width="100%">
+      <source src="videos/training-video.mp4" type="video/mp4">
+      Your browser does not support the video.
+    </video>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
 <div id="sim-root">
   <div class="phone-frame">
 
